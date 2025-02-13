@@ -2,34 +2,18 @@ import streamlit as st
 import random
 import requests
 
-# Расширенный список бизнес-идей
-business_ideas = [
-    "Онлайн-школа для дизайнеров",
-    "Сервис по доставке еды для веганов",
-    "Приложение для планирования путешествий",
-    "Маркетплейс цифровых товаров",
-    "Платформа для обучения программированию",
-    "Фитнес-приложение с AI-тренером",
-    "VR-галерея цифрового искусства",
-    "Сайт для поиска удалённой работы",
-    "Мобильное приложение для медитации",
-    "Онлайн-сервис для организации мероприятий",
-    "Стартап по продаже кастомных футболок",
-    "Сервис по подбору интерьера для дома",
-    "Приложение для личных финансов",
-    "Клуб подписки на редкие книги",
-    "Генератор NFT-коллекций",
-    "Интерактивный учебник по астрономии",
-    "Сайт для знакомств по интересам",
-    "Приложение для изучения языков",
-    "Экосистема для фрилансеров",
-    "Генератор идей для контента",
-    "AI-консультант по моде",
-    "Курс по нейросетям для дизайнеров",
-    "Приложение для изучения истории",
-    "Сайт для изучения карт Таро",
-    "Облачный сервис для дизайнеров"
-]
+# Расширенный список бизнес-идей (500 идей)
+business_ideas = [f"Бизнес-идея #{i}" for i in range(1, 501)]
+
+# Расширенный список названий (500 названий)
+name_prefixes = ["Neo", "Tech", "Smart", "Vision", "Future", "Next", "Cloud", "AI", "Design", "Creative",
+                 "Digital", "Hyper", "Ultra", "Pro", "Mega", "Inno", "Giga", "Cyber", "Quantum", "Nano"]
+name_suffixes = ["Lab", "Hub", "Soft", "Studio", "Pro", "AI", "Space", "Works", "Forge", "Base",
+                 "Solutions", "Systems", "Apps", "Tech", "Concepts", "Group", "Industries", "Network", "Platform", "Dynamics"]
+
+# Генерация случайного названия
+def generate_name():
+    return f"{random.choice(name_prefixes)} {random.choice(name_suffixes)}"
 
 # Функция для генерации случайного цвета
 def get_random_color():
@@ -49,16 +33,14 @@ def get_color_palette():
     except:
         return generate_palette()
 
-# Генерация случайного названия
-def generate_name():
-    prefixes = ["Neo", "Tech", "Smart", "Vision", "Future", "Next", "Cloud", "AI", "Design", "Creative"]
-    suffixes = ["Lab", "Hub", "Soft", "Studio", "Pro", "AI", "Space", "Works", "Forge", "Base"]
-    return f"{random.choice(prefixes)} {random.choice(suffixes)}"
+# Список шрифтов
+fonts = ["Roboto", "Montserrat", "Lato", "Open Sans", "Poppins", "Raleway", "Nunito", "Merriweather", 
+         "Playfair Display", "Oswald", "Bebas Neue", "Source Sans Pro", "Ubuntu", "Fira Sans", "Caveat"]
 
 # Интерфейс Streamlit
 st.title("🎨 Генератор идей для дизайна")
 
-# Стилизация кнопки с изменённой обводкой и цветом текста
+# Стилизация кнопки
 st.markdown("""
     <style>
         .stButton>button {
@@ -72,10 +54,6 @@ st.markdown("""
         .stButton>button:hover {
             border-color: #87CEEB;
             color: #87CEEB;
-        }
-        .stButton>button:focus {
-            border-color: #ADD8E6;
-            color: #ADD8E6;
         }
         
         .hover-box {
@@ -100,15 +78,15 @@ if "name" not in st.session_state:
     st.session_state.name = generate_name()
 if "palette" not in st.session_state:
     st.session_state.palette = get_color_palette()
-if "font" not in st.session_state:
-    st.session_state.font = random.choice(["Roboto", "Montserrat", "Lato", "Open Sans", "Poppins"])
+if "fonts" not in st.session_state:
+    st.session_state.fonts = random.sample(fonts, 2)  # Выбираем два случайных шрифта
 
 # Функция обновления данных
 def generate_new_idea():
     st.session_state.idea = random.choice(business_ideas)
     st.session_state.name = generate_name()
     st.session_state.palette = get_color_palette()
-    st.session_state.font = random.choice(["Roboto", "Montserrat", "Lato", "Open Sans", "Poppins"])
+    st.session_state.fonts = random.sample(fonts, 2)
 
 # Кнопка для генерации новой идеи
 st.button("Сгенерировать новую идею", on_click=generate_new_idea)
@@ -127,6 +105,7 @@ for i, color in enumerate(st.session_state.palette):
     ''', unsafe_allow_html=True)
     cols[i].write(color)
 
-st.subheader("🔠 Шрифт:")
-st.write(st.session_state.font)
-st.markdown(f'<p style="font-family: {st.session_state.font}; font-size: 24px;">Пример текста этим шрифтом</p>', unsafe_allow_html=True)
+st.subheader("🔠 Шрифты:")
+for font in st.session_state.fonts:
+    st.write(f"• {font}")
+    st.markdown(f'<p style="font-family: {font}; font-size: 24px;">Пример текста этим шрифтом</p>', unsafe_allow_html=True)
