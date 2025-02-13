@@ -1,8 +1,6 @@
 import streamlit as st
 import random
 import requests
-from randomcolor import RandomColor
-import colorsys
 
 # Расширенный список бизнес-идей
 business_ideas = [
@@ -33,26 +31,15 @@ business_ideas = [
     "Облачный сервис для дизайнеров"
 ]
 
-# Функция для генерации гармоничных цветов
-def generate_harmonious_palette(base_color):
-    base_hue = colorsys.rgb_to_hsv(*base_color)[0]  # Получаем оттенок (hue) из RGB
-    harmonious_palette = []
+# Функция для генерации случайного цвета
+def get_random_color():
+    return "#{:06x}".format(random.randint(0, 0xFFFFFF))
 
-    # Генерируем дополнительные цвета на основе теории гармонии
-    for i in range(5):
-        hue = (base_hue + i * 0.1) % 1  # Генерация гармоничных оттенков (сдвиг hue)
-        rgb = colorsys.hsv_to_rgb(hue, 0.8, 0.8)  # Преобразуем обратно в RGB
-        harmonious_palette.append(rgb)
-    return harmonious_palette
-
-# Генерация случайного цвета и гармоничных цветов
+# Генерация случайной цветовой палитры
 def generate_palette():
-    rand_color = RandomColor()
-    base_color = rand_color.generate(count=1)[0]
-    base_rgb = [int(base_color[1:3], 16) / 255, int(base_color[3:5], 16) / 255, int(base_color[5:7], 16) / 255]
-    return generate_harmonious_palette(base_rgb)
+    return [get_random_color() for _ in range(5)]
 
-# Функция для загрузки палитры с Coolors API
+# Функция для загрузки палитры с Coolors API (fallback на локальную генерацию)
 def get_color_palette():
     try:
         response = requests.get("https://www.colr.org/json/colors/random/5")
@@ -106,29 +93,40 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Создаем функцию для обработки нажатия кнопки
-if st.button("Сгенерировать новую идею"):
-    idea = random.choice(business_ideas)
-    name = generate_name()
-    palette = get_color_palette()
-    font = random.choice(["Roboto", "Montserrat", "Lato", "Open Sans", "Poppins"])
+# Создаём переменные в сессии Streamlit
+if "idea" not in st.session_state:
+    st.session_state.idea = random.choice(business_ideas)
+if "name" not in st.session_state:
+    st.session_state.name = generate_name()
+if "palette" not in st.session_state:
+    st.session_state.palette = get_color_palette()
+if "font" not in st.session_state:
+    st.session_state.font = random.choice(["Roboto", "Montserrat", "Lato", "Open Sans", "Poppins"])
 
-    # Отображение результата
-    st.subheader("📌 Идея проекта:")
-    st.write(f"{idea}")
+# Функция обновления данных
+def generate_new_idea():
+    st.session_state.idea = random.choice(business_ideas)
+    st.session_state.name = generate_name()
+    st.session_state.palette = get_color_palette()
+    st.session_state.font = random.choice(["Roboto", "Montserrat", "Lato", "Open Sans", "Poppins"])
 
-    st.subheader("🏷 Название:")
-    st.write(f"{name}")
+# Кнопка для генерации новой идеи
+st.button("Сгенерировать новую идею", on_click=generate_new_idea)
 
-    st.subheader("🎨 Цветовая палитра:")
-    cols = st.columns(len(palette))
-    for i, color in enumerate(palette):
-        hex_color = '#{:02x}{:02x}{:02x}'.format(int(color[0]*255), int(color[1]*255), int(color[2]*255))
-        cols[i].markdown(f'''
-            <div class="hover-box" style="background-color: {hex_color};"></div>
-        ''', unsafe_allow_html=True)
-        cols[i].write(hex_color)
+st.subheader("📌 Идея проекта:")
+st.write(st.session_state.idea)
 
-    st.subheader("🔠 Шрифт:")
-    st.write(f"{font}")
-    st.markdown(f'<p style="font-family: {font}; font-size: 24px;">Пример текста этим шрифтом</p>', unsafe_allow_html=True)
+st.subheader("🏷 Название:")
+st.write(st.session_state.name)
+
+st.subheader("🎨 Цветовая палитра:")
+cols = st.columns(len(st.session_state.palette))
+for i, color in enumerate(st.session_state.palette):
+    cols[i].markdown(f'''
+        <div class="hover-box" style="background-color: {color};"></div>
+    ''', unsafe_allow_html=True)
+    cols[i].write(color)
+
+st.subheader("🔠 Шрифт:")
+st.write(st.session_state.font)
+st.markdown(f'<p style="font-family: {st.session_state.font}; font-size: 24px;">Пример текста этим шрифтом</p>', unsafe_allow_html=True)
