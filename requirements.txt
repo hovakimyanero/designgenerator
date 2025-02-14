@@ -1,1 +1,2 @@
 colorthief
+matplotlib
