@@ -1,79 +1,111 @@
 import streamlit as st
 import random
 import requests
-from colorthief import ColorThief
-from io import BytesIO
-from PIL import Image
-import matplotlib.font_manager as fm
 
-# === 500 БИЗНЕС-ИДЕЙ ===
-business_ideas = [
-    "Онлайн-школа для дизайнеров", "Интернет-магазин техники", "Продажа хендмейд-изделий через Instagram",
-    "Курсы программирования для детей", "Доставка готовых рационов питания", "Сервис по подписке на книги",
-    "Аренда декораций для фотосессий", "VR-тур по городам мира", "Разработка мобильных игр",
-    "Создание умных зеркал с дополненной реальностью", "Приложение для планирования свиданий",
-    "Бюро переводов с нейросетями", "Онлайн-консультации по личным финансам", "Маркетплейс для креативных услуг",
-    "Продажа готовых решений для интернет-магазинов", "Организация авторских туров", "Школа блогеров",
-    "3D-печать на заказ", "Разработка чат-ботов для бизнеса", "Эко-упаковка для малого бизнеса",
-    "Сервис аренды велосипедов", "Продажа цифровых товаров", "Платформа для онлайн-курсов",
-    "Мобильное приложение для тренеров", "Стартап по умному освещению", "Создание NFT-контента",
-    "Разработка AR-приложений", "Интернет-магазин экологичных товаров", "Консультации по личному бренду",
-    "Фриланс-платформа для художников", "Кофейня с подпиской", "Онлайн-школа по киберспорту",
-    "Подписка на дизайнерскую одежду", "AI-ассистент для бизнеса", "Разработка VR-игр",
-    "Агентство по созданию мемов", "Сервис для совместных путешествий", "Бот для финансового планирования",
-    "Продажа кастомных смартфонов", "Мастер-классы по рисованию", "Студия создания фильмов для YouTube",
-    *["Идея #" + str(i) for i in range(41, 501)]  # Дополнение до 500 идей
-]
+# Расширенный список бизнес-идей (500 идей)
+business_ideas = [f"Бизнес-идея #{i}" for i in range(1, 501)]
 
-# === 500 НАЗВАНИЙ ===
-project_names = [
-    "Creative Spark", "Visionary Design", "Innovate Hub", "Aesthetic Lab", "Digital Blueprint",
-    "Pixel Perfection", "Design Wave", "Infinite Ideas", "Bold Concepts", "Minimalist Mindset",
-    "Future Vision", "Bright Creations", "NextGen Studio", "Inspire Works", "DesignCraft",
-    "Visual Genius", "Concept Factory", "Modern Art Lab", "Abstract Mind", "Creative Shift",
-    *["Название #" + str(i) for i in range(21, 501)]  # Дополнение до 500 названий
-]
+# Расширенный список названий (500 названий)
+name_prefixes = ["Neo", "Tech", "Smart", "Vision", "Future", "Next", "Cloud", "AI", "Design", "Creative",
+                 "Digital", "Hyper", "Ultra", "Pro", "Mega", "Inno", "Giga", "Cyber", "Quantum", "Nano"]
+name_suffixes = ["Lab", "Hub", "Soft", "Studio", "Pro", "AI", "Space", "Works", "Forge", "Base",
+                 "Solutions", "Systems", "Apps", "Tech", "Concepts", "Group", "Industries", "Network", "Platform", "Dynamics"]
 
-# === ФУНКЦИЯ ДЛЯ ВЫБОРА ШРИФТОВ ===
-def get_random_fonts():
-    available_fonts = [f.name for f in fm.fontManager.ttflist]
-    return random.sample(available_fonts, 2)
+# Генерация случайного названия
+def generate_name():
+    return f"{random.choice(name_prefixes)} {random.choice(name_suffixes)}"
 
-# === ФУНКЦИЯ ДЛЯ ВЫБОРА ЦВЕТОВОЙ ПАЛИТРЫ ===
-def get_color_palette(image_url):
+# Функция для генерации случайного цвета
+def get_random_color():
+    return "#{:06x}".format(random.randint(0, 0xFFFFFF))
+
+# Генерация случайной цветовой палитры
+def generate_palette():
+    return [get_random_color() for _ in range(5)]
+
+# Функция для загрузки палитры с Coolors API (fallback на локальную генерацию)
+def get_color_palette():
     try:
-        response = requests.get(image_url)
-        img = Image.open(BytesIO(response.content))
-        color_thief = ColorThief(BytesIO(response.content))
-        palette = color_thief.get_palette(color_count=5)
-        return palette
+        response = requests.get("https://www.colr.org/json/colors/random/5")
+        data = response.json()
+        colors = [f"#{c['hex']}" for c in data["colors"] if c["hex"]]
+        return colors if colors else generate_palette()
     except:
-        return [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255)]
+        return generate_palette()
 
-# === ФУНКЦИЯ ГЕНЕРАЦИИ ДАННЫХ ===
-def generate_new_design():
-    st.session_state.project_name = random.choice(project_names)
-    st.session_state.business_idea = random.choice(business_ideas)
-    st.session_state.fonts = get_random_fonts()
-    image_url = "https://source.unsplash.com/random/800x600/?design"
-    st.session_state.colors = get_color_palette(image_url)
+# Список шрифтов
+fonts = ["Roboto", "Montserrat", "Lato", "Open Sans", "Poppins", "Raleway", "Nunito", "Merriweather", 
+         "Playfair Display", "Oswald", "Bebas Neue", "Source Sans Pro", "Ubuntu", "Fira Sans", "Caveat"]
 
-# === ИНТЕРФЕЙС STREAMLIT ===
+# Интерфейс Streamlit
 st.title("🎨 Генератор идей для дизайна")
 
-if "project_name" not in st.session_state:
-    generate_new_design()
+# Стилизация кнопки
+st.markdown("""
+    <style>
+        .stButton>button {
+            border: 2px solid #ADD8E6;
+            color: #ADD8E6;
+            background-color: transparent;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .stButton>button:hover {
+            border-color: #87CEEB;
+            color: #87CEEB;
+        }
+        
+        .hover-box {
+            width: 180px;
+            height: 180px;
+            border-radius: 18px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            box-shadow: 8px 8px 12px rgba(0, 0, 0, 0.15), -8px -8px 12px rgba(255, 255, 255, 0.7);
+        }
+        
+        .hover-box:hover {
+            transform: translateY(-20px);
+            box-shadow: 8px 8px 12px rgba(0, 0, 0, 0.3), -8px -8px 12px rgba(255, 255, 255, 0.3);
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-st.button("🔄 Сгенерировать новую идею", on_click=generate_new_design)
+# Создаём переменные в сессии Streamlit
+if "idea" not in st.session_state:
+    st.session_state.idea = random.choice(business_ideas)
+if "name" not in st.session_state:
+    st.session_state.name = generate_name()
+if "palette" not in st.session_state:
+    st.session_state.palette = get_color_palette()
+if "fonts" not in st.session_state:
+    st.session_state.fonts = random.sample(fonts, 2)  # Выбираем два случайных шрифта
 
-st.subheader("📝 Название проекта:")
-st.write(st.session_state.project_name)
+# Функция обновления данных
+def generate_new_idea():
+    st.session_state.idea = random.choice(business_ideas)
+    st.session_state.name = generate_name()
+    st.session_state.palette = get_color_palette()
+    st.session_state.fonts = random.sample(fonts, 2)
 
-st.subheader("💡 Бизнес-идея:")
-st.write(st.session_state.business_idea)
+# Кнопка для генерации новой идеи
+st.button("Сгенерировать новую идею", on_click=generate_new_idea)
 
-st.subheader("🖋 Рекомендуемые шрифты:")
-st.write(", ".join(st.session_state.fonts))
+st.subheader("📌 Идея проекта:")
+st.write(st.session_state.idea)
+
+st.subheader("🏷 Название:")
+st.write(st.session_state.name)
 
 st.subheader("🎨 Цветовая палитра:")
-st.write(st.session_state.colors)
+cols = st.columns(len(st.session_state.palette))
+for i, color in enumerate(st.session_state.palette):
+    cols[i].markdown(f'''
+        <div class="hover-box" style="background-color: {color};"></div>
+    ''', unsafe_allow_html=True)
+    cols[i].write(color)
+
+st.subheader("🔠 Шрифты:")
+for font in st.session_state.fonts:
+    st.write(f"• {font}")
+    st.markdown(f'<p style="font-family: {font}; font-size: 24px;">Пример текста этим шрифтом</p>', unsafe_allow_html=True)
